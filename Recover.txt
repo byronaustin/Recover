@@ -1,0 +1,193 @@
+var now = Date();
+var ext, r
+var DEBUG = true;
+var path, dpath
+var tl, w
+var RESTOREPATH = "\\Storage Card\\Route\\"
+
+function App_Open(){
+Combo1.AddItem("Select Source");
+Combo1.AddItem("\\Storage Card\\Backup");
+Combo1.AddItem("\\Storage Card\\Archive");
+Combo1.AddItem("\\my documents\\Backup");
+Combo1.ListIndex = 0
+Combo2.AddItem("Select Destination");
+Combo2.AddItem("\\Storage Card\\Route\\");
+Combo2.AddItem("\\my documents\\");
+Combo2.ListIndex = 0
+Image1.Text = "Wait while I search..."
+Text1.Text = "";
+Progress1.Visible = false;
+List1.Visible = false;
+List2.Visible = false;
+Button1.Visible = false;
+Button2.Visible = false;
+Text1.Visible = false;
+Label1.Caption = "Restore from:"
+Label1.Visible = false;
+Text3.Text = "";
+Text3.Visible = false;
+Text4.Text = "";
+Text4.Visible = false;
+Label2.Caption = "Restore to:"
+Label2.Visible = false;
+Combo2.Visible = false;
+Combo1.Visible = false;
+Alert("Select file Source to restore from");
+Combo1.Visible = true;
+}
+
+function Combo1_SelChange(){
+if(Combo1.Text != "Select Source"){
+ path = Combo1.Text
+ Text1.Text = path
+ Text3.Text = path
+ Image1.Tool = 0
+ Combo1.Visible = false;
+ Alert("Select destination directory")
+ Combo2.Visible = true;
+ Progress1.visible = false;
+ }
+}
+
+function Combo2_SelChange(){
+if(Combo2.Text != "Select Destination"){
+ List2.Clear();
+ List1.Clear();
+ Button2.Visible = true;
+ dpath = Combo2.Text
+ Text4.Text = dpath;
+ Combo2.Visible = false;
+ cmdExtension_Click()
+ Image1.Tool = 0
+ Alert("Select file type to restore");
+ go("form3")
+ Combo1.Visible = false;
+ Combo2.Visible = false;
+ Text1.Visible = false;
+ Progress1.visible = false;
+ List2.Visible = true;
+ }
+}
+
+function List2_SelChange(){
+ var s, t, u, j, v, result;
+ List1.Clear();
+ List2.Visible = false;
+ go("form1")
+ j = List2.NumItems-1;
+ for(i=j;i>-1;i--)
+ { 
+  if (List2.ItemSelected(i) == true)
+  { 
+   ext = (List2.GetItemString(i));
+   t = path //"\\my documents\\"
+   v = t + "\\*" + ext
+   s = findfirst(v,0);//"\\my documents\\*" + ext ,0);
+   while (s != "") {
+   s = Left(s,(s.length-8))
+     List1.additem(s);
+     Text1.Text = s
+     s = findnext();
+   }
+  }
+ }
+}
+
+
+function Left(str, n){
+  if (n <= 0)
+	    return "";
+	else if (n > String(str).length)
+	    return str;
+	else
+	    return String(str).substring(0,n);
+}
+function Right(str, n){
+    if (n <= 0)
+       return "";
+    else if (n > String(str).length)
+       return str;
+    else {
+       var iLen = String(str).length;
+       return String(str).substring(iLen, iLen - n);
+    }
+ 
+}
+
+function ImageBox1_Click() {
+  Image1.Toggle = true;
+  if (Image1.Checked == True)
+    Image1.Checked = false;
+  else
+    Image1.Checked = true;
+}
+
+function List2_Single(){
+ var i,j,a,s,s1;
+ j = List2.NumItems-2;
+ for(i=j;i>-1;i--)
+ {
+  Progress1.Visible = true;
+  Progress1.SetRange(0,j);
+  Progress1.SetStep(1);
+  Progress1.StepIt();
+  s=(List2.GetItemString(i+1));
+  s1=(List2.GetItemString(i));
+  if(s==s1)
+  {
+   List2.RemoveItem(i);
+  }
+ }
+ Progress1.Visible = false;
+}
+
+function cmdExtension_Click() {
+  var s, t, u, v;
+  go ("form2")
+  List1.Clear();
+  t = path 
+  v = t + "\\*.bku"
+  Text1.Text = v
+  s = findfirst(v ,0);
+  while (s != "") {
+    u = Right(s,8);
+    List2.additem(u);
+    s = findnext();
+  }
+  List2_Single()
+}
+
+function List1_SelChange(){
+var selected
+Text3.Visible = true;
+Label1.Visible = true;
+Text4.Visible = true;
+Label2.Visible = true;
+Text1.Text = "";
+selected = List1.ListIndex
+Text1.Text = List1.GetItemString(selected)
+w = Text1.Text
+if (w.substr(8,1)=="_") {
+	tl = w.length-9;
+	}
+else
+	{
+	tl = w.length
+	}
+Text3.Text = path + "\\" + Right(w,tl) + Left(ext,4)
+}
+
+function List1_DblClick() {
+  alert(List1.GetItemString(List1.ListIndex));
+}
+
+function Button1_Click(){
+   t = path + "\\" + w + ext
+   u = Text4.Text + Right(w,tl) + Left(ext,4)
+ //  u = "\\Storage Card\\Route\\" + Right(w,tl) + Left(ext,4)
+   CopyFile(t, u);
+   Alert("Restore complete!");
+   App.Exit();
+//   Execute("\\Program Files\\Recover\\Recover.exe", "");
+}
